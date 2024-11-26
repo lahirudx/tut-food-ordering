@@ -6,8 +6,8 @@ import { Link, Stack } from "expo-router";
 import { supabase } from "@/lib/supabase";
 
 const SignUpScreen = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("lahirudx@gmail.com");
+  const [password, setPassword] = useState("12341234");
   const [loading, setLoading] = useState(false);
 
   const signUpWithEmail = async () => {
