@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, Image, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import React, { useState } from "react";
 import { Link, Stack, useLocalSearchParams, useRouter } from "expo-router";
 import products from "@/assets/data/products";
@@ -8,18 +15,20 @@ import { useCart } from "@/providers/CartProvider";
 import { defaultPizzaImage } from "@/constants/Images";
 import { FontAwesome } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
+import { useProduct } from "@/api/products";
 
 const sizes: PizzaSize[] = ["S", "M", "L", "XL"];
 
 const ProductDetailsScreen = () => {
-  const { id } = useLocalSearchParams();
   const router = useRouter();
+
+  const { id: stringId } = useLocalSearchParams();
+  const id = parseFloat(typeof stringId === "string" ? stringId : stringId[0]);
+  const { data: product, error, isLoading } = useProduct(id);
 
   const { addItem } = useCart();
 
   const [selectedSize, setSelectedSize] = useState<PizzaSize>("M");
-
-  const product = products.find((product) => product.id === Number(id));
 
   const addToCart = () => {
     if (!product) {
@@ -30,8 +39,28 @@ const ProductDetailsScreen = () => {
     router.push("/cart");
   };
 
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={Colors.light.tint} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Error fetching products</Text>
+      </View>
+    );
+  }
+
   if (!product) {
-    return <Text>Product not found</Text>;
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Product not found</Text>
+      </View>
+    );
   }
   return (
     <View style={styles.container}>

@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, Image, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import React, { useState } from "react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import products from "@/assets/data/products";
@@ -6,18 +13,21 @@ import { PizzaSize } from "@/types";
 import Button from "@/components/Button";
 import { useCart } from "@/providers/CartProvider";
 import { defaultPizzaImage } from "@/constants/Images";
+import { useProduct } from "@/api/products";
+import Colors from "@/constants/Colors";
 
 const sizes: PizzaSize[] = ["S", "M", "L", "XL"];
 
 const ProductDetailsScreen = () => {
-  const { id } = useLocalSearchParams();
+  const { id: stringId } = useLocalSearchParams();
+  const id = parseFloat(typeof stringId === "string" ? stringId : stringId[0]);
+  const { data: product, error, isLoading } = useProduct(id);
+
   const router = useRouter();
 
   const { addItem } = useCart();
 
   const [selectedSize, setSelectedSize] = useState<PizzaSize>("M");
-
-  const product = products.find((product) => product.id === Number(id));
 
   const addToCart = () => {
     if (!product) {
@@ -28,9 +38,30 @@ const ProductDetailsScreen = () => {
     router.push("/cart");
   };
 
-  if (!product) {
-    return <Text>Product not found</Text>;
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={Colors.light.tint} />
+      </View>
+    );
   }
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Error fetching products</Text>
+      </View>
+    );
+  }
+
+  if (!product) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Product not found</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: product.name }} />

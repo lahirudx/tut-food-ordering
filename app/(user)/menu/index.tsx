@@ -1,9 +1,34 @@
-import { StyleSheet, Image, Text, View, FlatList } from "react-native";
+import {
+  StyleSheet,
+  Image,
+  Text,
+  View,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import ProductListItem from "@/components/ProductListItem";
 import Colors from "@/constants/Colors";
-import products from "@/assets/data/products";
+import { useProductsList } from "@/api/products";
 
 export default function MenuScreen() {
+  const { data: products, isLoading, error } = useProductsList();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={Colors.light.tint} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Error fetching products</Text>
+      </View>
+    );
+  }
+
   return (
     <FlatList
       data={products}
